@@ -1,0 +1,22 @@
+#!/bin/bash
+user=$1
+host=$2
+port=$3
+
+if [ "$user" = "" ] ; then
+  echo "bbssh <username> <remote host> <remote port>"
+  exit 1
+fi
+
+pass=$(awk -v host="$host" '/^\[entry\]/{f=0} /address=/ {if ($0 ~ "address="host) f=1} f' ~/.qodem/fonebook.txt | grep '^password=' | cut -d'=' -f2)
+
+
+if [ "$port" == "" ] ; then
+  port=22
+fi
+
+if [ "$pass" == "" ] ; then
+  ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -e none -l $user -p $port $host
+else
+  sshpass -p $pass ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -e none -l $user -p $port $host
+fi
